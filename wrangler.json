@@ -2,7 +2,7 @@
   "name": "sam-lev",
   "compatibility_date": "2025-11-17",
   "assets": {
-    "directory": "./samlev"
+    "directory": "./samlev 2"
   },
   "main": "src/index.js"
 }
