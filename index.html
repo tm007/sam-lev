@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth scroll-pt-20"> <!-- Added scroll-pt-20 for header offset -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sam Levine</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vimeo Player API (with defer) -->
+    <script src="https://player.vimeo.com/api/player.js" defer></script>
+    <!-- Google Font: EB Garamond (for the "Gothic" serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base styles */
+        body {
+            /* Original serif font stack for body */
+            font-family: ui-serif, Georgia, serif;
+            /* Near-black for deep contrast */
+            background-color: #050505;
+            /* "Aged" or "parchment" white for text */
+            color: #c9c9c9;
+        }
+
+        /* Heading/Logo font */
+        .font-heading {
+            font-family: 'EB Garamond', ui-serif, Georgia, serif;
+        }
+
+        /* Animated Gothic Grain Texture */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            /* Ensure it's on top of everything */
+            background-image:
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0 1px, rgba(0, 0, 0, 0) 1px 4px),
+                repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.01) 0 1px, rgba(0, 0, 0, 0) 1px 5px);
+            background-size: 220px 220px, 180px 180px;
+            background-position: 0 0, 60px 40px;
+            mix-blend-mode: screen;
+            /* Subtle light-based blending */
+            opacity: .08;
+            /* Very subtle */
+            animation: drift 90s linear infinite;
+            will-change: background-position;
+        }
+
+        @keyframes drift {
+            from {
+                background-position: 0 0, 60px 40px;
+            }
+
+            to {
+                background-position: 400px 0, -120px 80px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::after {
+                animation: none;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* Smooth scroll animations (more cinematic) */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: opacity 1.2s cubic-bezier(0.19, 1, 0.22, 1), transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+            transition-delay: var(--delay, 0ms);
+            will-change: opacity, transform;
+        }
+
+        .fade-in-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Aspect ratio for video modal */
+        .aspect-video {
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Intro Name Animation */
+        #intro-name {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            /* The "invert" effect */
+            mix-blend-mode: difference;
+            z-index: 40;
+            /* Above video, below header (z-50) */
+
+            /* Animation definition */
+            animation: fade-in-settle 3s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            opacity: 0;
+            /* Set initial opacity for animation */
+        }
+
+        #intro-name h1 {
+            @apply font-heading text-white;
+            /* Base color is white */
+            font-size: clamp(3rem, 10vw, 8rem);
+            /* Responsive font size */
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+        }
+
+        /* Intro Keyframes */
+        @keyframes fade-in-settle {
+            0% {
+                opacity: 0;
+                transform: scale(1.03);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Mobile Menu Styles */
+        #mobile-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        #mobile-menu.hidden {
+            transform: translateX(100%);
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a] border-b border-white/10" id="header"
+        style="padding-top: env(safe-area-inset-top);">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between md:h-20">
+                <!-- Logo -->
+                <a href="#" class="font-heading text-4xl font-medium italic text-white -my-2 z-50 relative">
+                    SL
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden items-center gap-2 sm:flex">
+                    <a href="#about"
+                        class="font-heading rounded-none border-2 border-transparent px-4 py-2 text-sm tracking-wider text-white/70 transition-colors hover:text-white">About</a>
+                    <a href="#work"
+                        class="font-heading rounded-none border-2 border-transparent px-4 py-2 text-sm tracking-wider text-white/70 transition-colors hover:text-white">Work</a>
+                </div>
+
+                <!-- Mobile Controls -->
+                <div class="flex items-center gap-3 sm:hidden z-50 relative">
+                    <button id="soundToggleMobile"
+                        class="sound-toggle-btn font-heading border border-white/40 px-2 py-1 text-[10px] font-medium uppercase tracking-widest text-white/70 transition-colors hover:border-white hover:text-white">
+                        SOUND OFF
+                    </button>
+                    <button id="mobile-menu-btn" class="text-white/70 hover:text-white" aria-label="Menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu"
+            class="hidden fixed inset-0 bg-[#0a0a0a] z-40 flex flex-col items-center justify-center gap-8"
+            style="padding-top: env(safe-area-inset-top);">
+            <a href="#about"
+                class="mobile-menu-link font-heading text-2xl tracking-wider text-white/70 hover:text-white transition-colors">About</a>
+            <a href="#work"
+                class="mobile-menu-link font-heading text-2xl tracking-wider text-white/70 hover:text-white transition-colors">Work</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Section 1: Hero Reel -->
+        <section
+            class="relative w-full overflow-hidden mt-[calc(4rem_+_env(safe-area-inset-top))] aspect-video sm:mt-0 sm:h-screen sm:aspect-auto">
+            <!-- Intro Name Animation Element -->
+            <div id="intro-name">
+                <h1>Sam Levine</h1>
+            </div>
+
+            <!-- Vimeo Player -->
+            <div class="absolute inset-0">
+                <iframe id="reelIframe"
+                    src="https://player.vimeo.com/video/1116619019?autoplay=1&muted=1&playsinline=1&controls=0&title=0&byline=0&portrait=0&loop=1&dnt=1"
+                    class="h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#050505] to-transparent"></div>
+
+            <!-- Sound Toggle Button -->
+            <!-- Sound Toggle Button (Desktop) -->
+            <button id="soundToggleHome" class="sound-toggle-btn hidden sm:inline-block font-heading border bg-transparent px-5 py-2 text-xs font-medium uppercase tracking-widest transition-all duration-300 border-white/40 text-white/70 hover:border-white hover:text-white
+                           absolute bottom-6 right-6 z-10" type="button">
+                SOUND OFF
+            </button>
+
+        </section>
+
+        <!-- Section 2: Bio / About -->
+        <section id="about" class="mx-auto max-w-3xl px-4 pt-8 pb-24 sm:px-6 lg:px-8 sm:py-32">
+            <div class="fade-in-up text-center">
+                <p class="font-heading text-2xl font-medium leading-relaxed text-white sm:text-3xl text-balance">
+                    <!-- Added text-balance -->
+                    Sam is an award-winning writer/director from Atlanta, Georgia, currently studying at Tisch, NYU.
+                </p>
+                <p class="mt-6 text-base leading-7 text-neutral-400 sm:text-lg sm:leading-8 text-balance">
+                    <!-- Added text-balance -->
+                    Since childhood, Sam's love for film has driven him to seek out new ideas and uncover profound
+                    truths in the world. From music videos to commercials to movies, Sam has experience with leading
+                    top-notch crews and bringing imagination to life. His work is marked by a distinct visual language,
+                    blending classic cinematic techniques with a raw, contemporary edge. His unique artistry, combined
+                    with proven leadership on set, and novel voice empower him to reach as far as possible.
+                    He is currently working on his senior thesis film at NYU, which he's excited to bring to the
+                    festival circuit.
+                </p>
+                <!-- Social Links -->
+                <div class="mt-10 flex items-center justify-center gap-4">
+                    <a href="https://www.linkedin.com/in/sam-levine-3788501b0/" target="_blank" rel="noopener"
+                        class="font-heading inline-block border bg-transparent px-5 py-2 text-xs font-medium uppercase tracking-widest transition-all duration-300 border-white/40 text-white/70 hover:border-white hover:text-white">
+                        LinkedIn
+                    </a>
+                    <a href="https://vimeo.com/samlev" target="_blank" rel="noopener"
+                        class="font-heading inline-block border bg-transparent px-5 py-2 text-xs font-medium uppercase tracking-widest transition-all duration-300 border-white/40 text-white/70 hover:border-white hover:text-white">
+                        Vimeo
+                    </a>
+                    <a href="https://instagram.com/sam.levine" target="_blank" rel="noopener"
+                        class="font-heading inline-block border bg-transparent px-5 py-2 text-xs font-medium uppercase tracking-widest transition-all duration-300 border-white/40 text-white/70 hover:border-white hover:text-white">
+                        Instagram
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Project Gallery -->
+        <section id="work" class="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 sm:py-32">
+            <div class="fade-in-up">
+                <h2
+                    class="font-heading text-center text-3xl font-bold uppercase tracking-[.15em] text-white sm:text-4xl">
+                    Selected Works</h2>
+            </div>
+
+            <!-- Grid -->
+            <div class="mt-16 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3" id="gallery-grid">
+
+                <!-- Project data -->
+                <!-- Data will be injected here by JavaScript -->
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div class="border-t border-white/10 pt-8 text-center">
+            <p class="text-sm text-neutral-500">
+                &copy; <span id="year"></span> Sam Levine. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+
+    <!-- Modal (Lightbox) Player -->
+    <div id="player-modal"
+        class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/90 p-4 transition-opacity duration-300 hidden"
+        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <!-- Modal content -->
+        <div class="relative w-full max-w-5xl rounded-lg bg-[#050505] shadow-2xl border border-white/10 group/modal">
+            <!-- Header -->
+            <div class="flex items-start justify-between p-4">
+                <h3 id="modal-title" class="font-heading text-lg font-medium text-white"></h3>
+                <button id="modal-close-btn" type="button" class="text-neutral-400 hover:text-white">
+                    <span class="sr-only">Close</span>
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Video Player Container -->
+            <div id="modal-content" class="aspect-video w-full">
+                <!-- Iframe will be injected here -->
+            </div>
+
+            <!-- Navigation Arrows -->
+            <button id="modal-prev-btn" type="button"
+                class="flex absolute left-4 top-1/2 -translate-y-1/2 items-center justify-center w-12 h-12 bg-black/80 border-2 border-white/40 text-white hover:bg-black hover:border-white transition-all duration-300 z-10"
+                aria-label="Previous video">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <button id="modal-next-btn" type="button"
+                class="flex absolute right-4 top-1/2 -translate-y-1/2 items-center justify-center w-12 h-12 bg-black/80 border-2 border-white/40 text-white hover:bg-black hover:border-white transition-all duration-300 z-10"
+                aria-label="Next video">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Background overlay for closing -->
+        <div id="modal-bg-close" class="absolute inset-0 -z-10"></div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Apply Tailwind text-balance class dynamically ---
+            try {
+                const sheet = new CSSStyleSheet();
+                sheet.insertRule("p.text-balance { text-wrap: balance; }");
+                document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+            } catch (e) {
+                console.warn("Could not apply text-balance polyfill. Native support or Tailwind JIT required.");
+            }
+
+            // --- Mobile Menu Toggle ---
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
+
+            if (mobileMenuBtn && mobileMenu) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    document.body.style.overflow = mobileMenu.classList.contains('hidden') ? '' : 'hidden';
+                });
+
+                // Close menu when clicking a link
+                mobileMenuLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        mobileMenu.classList.add('hidden');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+
+            // --- Project Data ---
+            const projects = [
+                // Films
+                { id: '1120941444', title: "STYX", thumb: 'assets/thumbnails/styx thumbnail.png' },
+                { id: '1005930918', title: "DON'T LOOK", thumb: 'assets/thumbnails/dont look thumbnail.png' }, // Fixed path
+                { id: '962258324', title: "Drown / Short Film", thumb: 'assets/thumbnails/drown thumbnail.png' }, // Fixed path
+                { id: '960024498', title: "A Snowy Afternoon / Short Film" },
+                { id: '960017828', title: "The Unknown / Silent Short Film" }, // Removed incorrect thumb
+                { id: '960012095', title: "Shadow's Reach / Silent Short Film", thumb: 'assets/thumbnails/S&S thumbnail.png' }, // Fixed path
+                { id: '959956645', title: "The Search: Take 1 / Short Narrative" },
+                // Music Videos
+                { id: '960033813', title: "Ode to Sci-Fi / Edit" },
+                // Experimental
+                { id: '959880189', title: "Burn / Experimental Short Film" }
+            ];
+
+            const galleryGrid = document.getElementById('gallery-grid');
+            if (galleryGrid) {
+                projects.forEach((project, index) => {
+                    const card = document.createElement('a');
+                    card.href = '#';
+                    card.className = 'group project-card fade-in-up relative';
+                    card.dataset.vimeoId = project.id;
+                    card.dataset.title = project.title;
+                    card.style.setProperty('--delay', `${index * 100}ms`); // For staggered animation
+
+                    // Use uploaded thumbnail if available, otherwise use Vimeo thumbnail
+                    const hasCustomThumb = !!project.thumb;
+                    const imageUrl = hasCustomThumb ?
+                        project.thumb :
+                        `https://vumbnail.com/${project.id}.jpg`;
+
+                    card.innerHTML = `
+                        <div class="relative overflow-hidden">
+                            <div class="aspect-video w-full">
+                                <img src="${imageUrl}" 
+                                     alt="${project.title}" 
+                                     class="h-full w-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${hasCustomThumb ? 'group-hover:brightness-50' : 'group-hover:brightness-75'}">
+                            </div>
+                            ${hasCustomThumb ? `
+                            <!-- Superimposed Title (always visible for custom thumbnails) -->
+                            <div class="absolute inset-0 flex items-center justify-center p-6 bg-black/40">
+                                <h3 class="font-heading text-center text-2xl font-medium text-white drop-shadow-lg">${project.title}</h3>
+                            </div>
+                            ` : `
+                            <!-- Hover Title Overlay (for Vimeo thumbnails) -->
+                            <div class="absolute inset-0 flex items-center justify-center p-6 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                                <h3 class="font-heading text-center text-2xl font-medium text-white">${project.title}</h3>
+                            </div>
+                            `}
+                        </div>
+                    `;
+                    galleryGrid.appendChild(card);
+
+                    // Preload the image
+                    const img = new Image();
+                    img.src = imageUrl;
+                });
+            }
+
+            // --- Header Scroll Behavior ---
+            // Header is now permanently fixed via CSS.
+
+            // --- Hero Reel Sound Toggle ---
+            const soundToggles = document.querySelectorAll('.sound-toggle-btn');
+            const reelIframe = document.getElementById('reelIframe');
+
+            let vimeoPlayer;
+
+            function initializeVimeoPlayer() {
+                if (reelIframe && window.Vimeo) {
+                    vimeoPlayer = new Vimeo.Player(reelIframe);
+                    setupSoundToggle(vimeoPlayer);
+                } else if (reelIframe) {
+                    // Fallback if script is slow or doesn't load
+                    console.warn("Vimeo Player API not loaded. Retrying on iframe load.");
+                    reelIframe.addEventListener('load', () => {
+                        if (window.Vimeo) {
+                            vimeoPlayer = new Vimeo.Player(reelIframe);
+                            setupSoundToggle(vimeoPlayer);
+                        } else {
+                            console.error("Vimeo Player API failed to load.");
+                        }
+                    });
+                }
+            }
+
+            function setupSoundToggle(player) {
+                if (soundToggles.length === 0) return;
+                let muted = true;
+
+                const render = () => {
+                    soundToggles.forEach(btn => {
+                        btn.textContent = muted ? 'SOUND OFF' : 'SOUND ON';
+                    });
+                };
+
+                player.setVolume(0).catch((e) => console.warn("Vimeo setVolume(0) failed:", e));
+
+                soundToggles.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        muted = !muted;
+                        render();
+                        player.setVolume(muted ? 0 : 1).catch((e) => console.warn("Vimeo setVolume failed:", e));
+                        player.play().catch((e) => console.warn("Vimeo play() failed:", e));
+                    });
+                });
+            }
+
+            // Initialize player
+            initializeVimeoPlayer();
+
+
+            // --- Intersection Observer for Animations ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            document.querySelectorAll('.fade-in-up').forEach(el => {
+                observer.observe(el);
+            });
+
+            // --- Modal (Lightbox) Logic ---
+            const modal = document.getElementById('player-modal');
+            const modalContent = document.getElementById('modal-content');
+            const modalTitle = document.getElementById('modal-title');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+            const closeModalBg = document.getElementById('modal-bg-close');
+            const prevBtn = document.getElementById('modal-prev-btn');
+            const nextBtn = document.getElementById('modal-next-btn');
+
+            let currentProjectIndex = 0;
+
+            const loadProject = (index) => {
+                if (index < 0 || index >= projects.length) return;
+
+                currentProjectIndex = index;
+                const project = projects[index];
+                const vimeoId = project.id;
+                const title = project.title;
+
+                // Special hash for STYX video
+                const hashParam = vimeoId === '1120941444' ? '&h=21318d7b4a' : '';
+
+                modalTitle.textContent = title;
+                modalContent.innerHTML = `
+                    <iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=0&playsinline=1&controls=1&title=0&byline=0&portrait=0&dnt=1${hashParam}" 
+                        class="h-full w-full" 
+                        allow="autoplay; fullscreen; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>`;
+
+                // Update button visibility
+                if (prevBtn && nextBtn) {
+                    prevBtn.style.display = index > 0 ? 'flex' : 'none';
+                    nextBtn.style.display = index < projects.length - 1 ? 'flex' : 'none';
+                }
+            };
+
+            if (galleryGrid && modal && modalContent && modalTitle && closeModalBtn) {
+                galleryGrid.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const card = e.target.closest('.project-card');
+                    if (card) {
+                        const vimeoId = card.dataset.vimeoId;
+                        // Find the index of this project
+                        currentProjectIndex = projects.findIndex(p => p.id === vimeoId);
+
+                        loadProject(currentProjectIndex);
+                        modal.classList.remove('hidden');
+                        document.body.style.overflow = 'hidden'; // Disable page scroll
+                    }
+                });
+
+                const closeModal = () => {
+                    modal.classList.add('hidden');
+                    modalContent.innerHTML = ''; // IMPORTANT: Stops video playback
+                    document.body.style.overflow = ''; // Re-enable page scroll
+                };
+
+                closeModalBtn.addEventListener('click', closeModal);
+                closeModalBg.addEventListener('click', closeModal);
+
+                // Navigation button handlers
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (currentProjectIndex > 0) {
+                            loadProject(currentProjectIndex - 1);
+                        }
+                    });
+                }
+
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (currentProjectIndex < projects.length - 1) {
+                            loadProject(currentProjectIndex + 1);
+                        }
+                    });
+                }
+
+                // Keyboard accessibility
+                window.addEventListener('keydown', (e) => {
+                    if (modal.classList.contains('hidden')) return;
+
+                    if (e.key === 'Escape') {
+                        closeModal();
+                    } else if (e.key === 'ArrowLeft' && currentProjectIndex > 0) {
+                        loadProject(currentProjectIndex - 1);
+                    } else if (e.key === 'ArrowRight' && currentProjectIndex < projects.length - 1) {
+                        loadProject(currentProjectIndex + 1);
+                    }
+                });
+            }
+
+            // --- Footer Year ---
+            const yearEl = document.getElementById('year');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
